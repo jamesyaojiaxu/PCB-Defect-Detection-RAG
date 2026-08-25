@@ -1,0 +1,164 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: Multi-category anomaly system
+      - heading "PCB 多板型异常检测" [level=1] [ref=e6]
+      - generic [ref=e7]: 动态发现板型 · OK/NG自动划分 · 每类独立模型
+    - generic [ref=e10]: 训练服务在线
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - heading "数据总览" [level=2] [ref=e14]
+        - generic [ref=e15]: D:\项目\pcb\PCB_Defect_Detection-main\data\pcb_categories
+      - generic [ref=e16]:
+        - generic [ref=e72]:
+          - generic [ref=e73]: 板型类别
+          - strong [ref=e74]: "5"
+        - generic [ref=e75]:
+          - generic [ref=e76]: OK图片
+          - strong [ref=e77]: "2465"
+        - generic [ref=e78]:
+          - generic [ref=e79]: NG图片
+          - strong [ref=e80]: "2545"
+        - generic [ref=e81]:
+          - generic [ref=e82]: 训练划分
+          - strong [ref=e83]: 自动 80 / 20
+      - generic [ref=e18]:
+        - generic [ref=e19]: 类别/OK/NG
+        - generic [ref=e20]: →
+        - generic [ref=e21]: 动态发现
+        - generic [ref=e22]: →
+        - generic [ref=e23]: 自动80/20划分
+        - generic [ref=e24]: →
+        - generic [ref=e25]: 每类独立模型
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "启动训练" [level=2] [ref=e28]
+        - generic [ref=e29]: 串行GPU队列
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: 系统名称
+            - textbox "系统名称" [ref=e34]: pcb_dataset
+          - generic [ref=e35]:
+            - generic [ref=e36]: 异常检测模型
+            - combobox "异常检测模型" [ref=e37]:
+              - option "PatchCore" [selected]
+              - option "EfficientAD"
+        - generic [ref=e38]:
+          - generic [ref=e39]: 参与训练的板型类别
+          - generic [ref=e40]:
+            - generic [ref=e84] [cursor=pointer]:
+              - checkbox "C1" [checked] [ref=e85]
+              - text: C1
+            - generic [ref=e86] [cursor=pointer]:
+              - checkbox "C2" [checked] [ref=e87]
+              - text: C2
+            - generic [ref=e88] [cursor=pointer]:
+              - checkbox "C3" [checked] [ref=e89]
+              - text: C3
+            - generic [ref=e90] [cursor=pointer]:
+              - checkbox "C4" [checked] [ref=e91]
+              - text: C4
+            - generic [ref=e92] [cursor=pointer]:
+              - checkbox "C5" [checked] [ref=e93]
+              - text: C5
+        - generic [ref=e42] [cursor=pointer]:
+          - checkbox "已有权重也重新训练" [ref=e43]
+          - text: 已有权重也重新训练
+        - button "为所选类别创建独立模型任务" [ref=e44] [cursor=pointer]
+      - generic [ref=e95]: 系统会在每个任务开始时自动划分该类别的OK训练集和正常测试集；NG全部用于测试。
+    - generic [ref=e45]:
+      - generic [ref=e46]:
+        - heading "板型类别" [level=2] [ref=e47]
+        - generic [ref=e48]: 系统不预设类别名称
+      - generic [ref=e49]:
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - strong [ref=e98]: C1
+            - generic [ref=e99]: ● 数据就绪
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - term [ref=e102]: OK 图片
+              - definition [ref=e103]: "493"
+            - generic [ref=e104]:
+              - term [ref=e105]: NG 图片
+              - definition [ref=e106]: "509"
+            - generic [ref=e107]:
+              - term [ref=e108]: 训练方式
+              - definition [ref=e109]: 独立模型
+        - generic [ref=e110]:
+          - generic [ref=e111]:
+            - strong [ref=e112]: C2
+            - generic [ref=e113]: ● 数据就绪
+          - generic [ref=e114]:
+            - generic [ref=e115]:
+              - term [ref=e116]: OK 图片
+              - definition [ref=e117]: "493"
+            - generic [ref=e118]:
+              - term [ref=e119]: NG 图片
+              - definition [ref=e120]: "509"
+            - generic [ref=e121]:
+              - term [ref=e122]: 训练方式
+              - definition [ref=e123]: 独立模型
+        - generic [ref=e124]:
+          - generic [ref=e125]:
+            - strong [ref=e126]: C3
+            - generic [ref=e127]: ● 数据就绪
+          - generic [ref=e128]:
+            - generic [ref=e129]:
+              - term [ref=e130]: OK 图片
+              - definition [ref=e131]: "493"
+            - generic [ref=e132]:
+              - term [ref=e133]: NG 图片
+              - definition [ref=e134]: "509"
+            - generic [ref=e135]:
+              - term [ref=e136]: 训练方式
+              - definition [ref=e137]: 独立模型
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - strong [ref=e140]: C4
+            - generic [ref=e141]: ● 数据就绪
+          - generic [ref=e142]:
+            - generic [ref=e143]:
+              - term [ref=e144]: OK 图片
+              - definition [ref=e145]: "493"
+            - generic [ref=e146]:
+              - term [ref=e147]: NG 图片
+              - definition [ref=e148]: "509"
+            - generic [ref=e149]:
+              - term [ref=e150]: 训练方式
+              - definition [ref=e151]: 独立模型
+        - generic [ref=e152]:
+          - generic [ref=e153]:
+            - strong [ref=e154]: C5
+            - generic [ref=e155]: ● 数据就绪
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - term [ref=e158]: OK 图片
+              - definition [ref=e159]: "493"
+            - generic [ref=e160]:
+              - term [ref=e161]: NG 图片
+              - definition [ref=e162]: "509"
+            - generic [ref=e163]:
+              - term [ref=e164]: 训练方式
+              - definition [ref=e165]: 独立模型
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - heading "训练队列" [level=2] [ref=e53]
+        - button "刷新" [ref=e54] [cursor=pointer]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - strong [ref=e58]: 当前没有运行任务
+          - text: GPU队列空闲
+        - generic [ref=e59]: "0"
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - heading "最近任务" [level=2] [ref=e62]
+        - generic [ref=e63]: 各类别分别记录
+      - generic [ref=e65]: 尚无训练任务
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - heading "模型仓库" [level=2] [ref=e68]
+        - generic [ref=e69]: 独立权重
+      - generic [ref=e71]: 五个模型训练完成后会显示在这里

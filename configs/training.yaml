@@ -1,0 +1,45 @@
+data:
+  normal_train_ratio: 0.8
+  split_seed: 42
+  image_size: [256, 256]
+  extensions: [".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"]
+  train_batch_size: 16
+  eval_batch_size: 16
+  num_workers: 0
+  val_split_ratio: 0.5
+  seed: 42
+
+models:
+  patchcore:
+    init_args:
+      backbone: resnet18
+      layers: [layer2, layer3]
+      pre_trained: true
+      coreset_sampling_ratio: 0.1
+      num_neighbors: 9
+    trainer:
+      max_epochs: 1
+      accelerator: auto
+      devices: 1
+      precision: 32-true
+      enable_checkpointing: true
+      enable_progress_bar: true
+      log_every_n_steps: 10
+
+  efficient_ad:
+    init_args:
+      teacher_out_channels: 384
+      model_size: s
+      lr: 0.0001
+      weight_decay: 0.00001
+      padding: false
+      pad_maps: true
+    trainer:
+      max_epochs: 100
+      max_steps: 10000
+      accelerator: auto
+      devices: 1
+      precision: 32-true
+      enable_checkpointing: true
+      enable_progress_bar: true
+      log_every_n_steps: 10

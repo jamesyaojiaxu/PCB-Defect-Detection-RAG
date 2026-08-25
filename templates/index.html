@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PCB 多板型异常检测</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 rx=%2214%22 fill=%22%2307111f%22/><path d=%22M16 20h32v24H16zM22 14v8m10-8v8m10-8v8M22 42v8m10-8v8m10-8v8%22 stroke=%22%2341d9ff%22 stroke-width=%224%22 fill=%22none%22/></svg>">
+    <style>
+        :root { --bg:#07111f; --panel:#0d1b2d; --panel2:#11243a; --line:#203852; --text:#edf5ff; --muted:#8ea6bf; --cyan:#41d9ff; --green:#54e6a5; --amber:#ffcf70; --red:#ff7b8d; }
+        * { box-sizing:border-box; }
+        body { margin:0; color:var(--text); background:radial-gradient(circle at 85% 0,#12304c 0,transparent 33%),var(--bg); font:14px/1.5 Inter,system-ui,"Microsoft YaHei",sans-serif; }
+        .shell { max-width:1440px; margin:auto; padding:30px; }
+        header { display:flex; justify-content:space-between; gap:30px; align-items:flex-start; margin-bottom:24px; }
+        .eyebrow { color:var(--cyan); text-transform:uppercase; letter-spacing:.18em; font-size:12px; font-weight:800; }
+        h1 { margin:7px 0 6px; font-size:34px; line-height:1.15; letter-spacing:-.03em; }
+        h2 { margin:0; font-size:17px; }
+        .subtitle,.muted { color:var(--muted); }
+        .live { display:flex; align-items:center; gap:9px; padding:9px 13px; border:1px solid #28506e; border-radius:99px; background:#0a1a2b; color:#b7cbe0; white-space:nowrap; }
+        .dot { width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 12px var(--green); }
+        .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
+        .card { grid-column:span 12; background:linear-gradient(145deg,rgba(17,36,58,.96),rgba(10,25,42,.96)); border:1px solid var(--line); border-radius:16px; padding:20px; box-shadow:0 14px 35px rgba(0,0,0,.18); }
+        .span-8 { grid-column:span 8; } .span-4 { grid-column:span 4; } .span-6 { grid-column:span 6; }
+        .card-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; }
+        .badge { border:1px solid #2c4b67; background:#10263d; color:#a9bfd5; padding:4px 9px; border-radius:99px; font-size:12px; }
+        .overview { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+        .metric { padding:14px; border-radius:12px; background:#0a1929; border:1px solid #1d3650; }
+        .metric span { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+        .metric strong { font-size:22px; }
+        .category-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; }
+        .category-card { position:relative; overflow:hidden; padding:14px; border:1px solid #24435f; border-radius:13px; background:linear-gradient(160deg,#102840,#0a192a); }
+        .category-card:after { content:""; position:absolute; inset:auto -20px -30px auto; width:75px; height:75px; border-radius:50%; background:rgba(65,217,255,.08); }
+        .category-title { display:flex; justify-content:space-between; align-items:center; margin-bottom:11px; }
+        .category-title strong { color:var(--cyan); font-size:18px; }
+        .ready { font-size:11px; color:var(--green); }
+        .category-card dl { margin:0; display:grid; gap:5px; }
+        .category-card dl div { display:flex; justify-content:space-between; }
+        .category-card dt { color:var(--muted); } .category-card dd { margin:0; font-weight:700; }
+        .flow { display:flex; align-items:center; gap:8px; margin-top:15px; overflow:auto; padding-bottom:2px; }
+        .node { min-width:76px; text-align:center; padding:8px 10px; border:1px solid #28465f; background:#0b1a2b; border-radius:9px; }
+        .arrow { color:#496881; }
+        form { display:grid; gap:14px; }
+        label { display:block; color:#afc2d4; font-size:12px; margin-bottom:6px; }
+        input,select { width:100%; border:1px solid #2a4863; border-radius:9px; background:#091827; color:var(--text); padding:10px 11px; outline:none; }
+        input:focus,select:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(65,217,255,.1); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+        .checks { display:flex; flex-wrap:wrap; gap:7px; }
+        .check { display:flex; align-items:center; gap:7px; margin:0; padding:7px 10px; border:1px solid #294660; border-radius:8px; background:#0a1929; cursor:pointer; }
+        .check input { width:auto; margin:0; accent-color:var(--cyan); }
+        button,.button { border:0; border-radius:9px; padding:10px 14px; color:#04202a; font-weight:800; cursor:pointer; background:linear-gradient(135deg,var(--cyan),var(--green)); text-decoration:none; display:inline-block; }
+        button.secondary { color:#bad0e4; border:1px solid #294862; background:#0b1b2c; }
+        button:disabled { opacity:.55; cursor:wait; }
+        .notice { margin-top:10px; padding:9px 11px; border-radius:8px; background:#0a1929; color:var(--muted); }
+        .notice.error { color:#ffc0c8; border:1px solid #6a3541; }
+        .queue { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:14px; border-radius:12px; background:#0a1929; border:1px solid #1e3952; }
+        .queue strong { display:block; font-size:16px; }
+        .count { width:42px; height:42px; border-radius:11px; display:grid; place-items:center; color:var(--cyan); background:#102b45; font-size:19px; font-weight:800; }
+        .table-wrap { overflow:auto; }
+        table { width:100%; border-collapse:collapse; min-width:760px; }
+        th,td { text-align:left; padding:11px 10px; border-bottom:1px solid #1d344b; vertical-align:top; }
+        th { color:#7895af; font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+        td { color:#c9d8e7; }
+        .status { display:inline-block; padding:3px 8px; border-radius:99px; font-size:11px; font-weight:800; }
+        .pending { color:var(--amber); background:rgba(255,207,112,.12); } .running { color:var(--cyan); background:rgba(65,217,255,.12); }
+        .completed { color:var(--green); background:rgba(84,230,165,.12); } .failed,.cancelled { color:var(--red); background:rgba(255,123,141,.12); }
+        .empty { color:var(--muted); padding:20px 0; text-align:center; }
+        code { color:#9eddf0; }
+        @media(max-width:1000px) { .span-8,.span-4,.span-6 { grid-column:span 12; } .category-grid { grid-template-columns:repeat(2,1fr); } }
+        @media(max-width:650px) { .shell{padding:18px}.overview{grid-template-columns:1fr 1fr}.category-grid,.form-row{grid-template-columns:1fr}header{display:block}.live{display:inline-flex;margin-top:14px} }
+    </style>
+</head>
+<body>
+<main class="shell">
+    <header>
+        <div><div class="eyebrow">Multi-category anomaly system</div><h1>PCB 多板型异常检测</h1><div class="subtitle">动态发现板型 · OK/NG自动划分 · 每类独立模型</div></div>
+        <div class="live"><span class="dot"></span><span id="health-text">训练服务在线</span></div>
+    </header>
+
+    <div class="grid">
+        <section class="card span-8">
+            <div class="card-head"><h2>数据总览</h2><span class="badge" id="dataset-path">正在读取…</span></div>
+            <div class="overview" id="overview"><div class="muted">正在检查板型类别数据</div></div>
+            <div class="flow"><div class="node">类别/OK/NG</div><span class="arrow">→</span><div class="node">动态发现</div><span class="arrow">→</span><div class="node">自动80/20划分</div><span class="arrow">→</span><div class="node">每类独立模型</div></div>
+        </section>
+
+        <section class="card span-4">
+            <div class="card-head"><h2>启动训练</h2><span class="badge">串行GPU队列</span></div>
+            <form id="train-form">
+                <div class="form-row">
+                    <div><label for="system-name">系统名称</label><input id="system-name" value="pcb_dataset" required></div>
+                    <div><label for="model-type">异常检测模型</label><select id="model-type"><option value="patchcore">PatchCore</option><option value="efficient_ad">EfficientAD</option></select></div>
+                </div>
+                <div><label>参与训练的板型类别</label><div class="checks" id="category-checks"><span class="muted">加载中…</span></div></div>
+                <label class="check"><input id="force-retrain" type="checkbox">已有权重也重新训练</label>
+                <button id="train-button" type="submit">为所选类别创建独立模型任务</button>
+            </form>
+            <div id="train-result"></div>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h2>板型类别</h2><span class="badge">系统不预设类别名称</span></div>
+            <div class="category-grid" id="category-grid"><div class="muted">正在加载…</div></div>
+        </section>
+
+        <section class="card span-4">
+            <div class="card-head"><h2>训练队列</h2><button class="secondary" type="button" onclick="refreshRuntime()">刷新</button></div>
+            <div id="queue-summary" class="muted">正在加载…</div>
+        </section>
+
+        <section class="card span-8">
+            <div class="card-head"><h2>最近任务</h2><span class="badge">各类别分别记录</span></div>
+            <div id="tasks-table" class="table-wrap"></div>
+        </section>
+
+        <section class="card">
+            <div class="card-head"><h2>模型仓库</h2><span class="badge">独立权重</span></div>
+            <div id="models-table" class="table-wrap"></div>
+        </section>
+    </div>
+</main>
+
+<script>
+const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const statusText = {pending:'等待',running:'训练中',completed:'完成',failed:'失败',cancelled:'取消'};
+
+async function api(url, options) {
+    const response = await fetch(url, options);
+    const body = await response.json();
+    if (!response.ok || !body.success) throw new Error(body.error || `HTTP ${response.status}`);
+    return body.data;
+}
+
+function metric(label, value) { return `<div class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`; }
+
+async function loadDataset() {
+    try {
+        const data = await api('/api/dataset');
+        document.getElementById('dataset-path').textContent = data.root;
+        const totals = data.categories.reduce((sum, item) => ({
+            ok:sum.ok + item.counts.OK,
+            ng:sum.ng + item.counts.NG
+        }), {ok:0,ng:0});
+        document.getElementById('overview').innerHTML = [
+            metric('板型类别', data.category_count), metric('OK图片', totals.ok),
+            metric('NG图片', totals.ng), metric('训练划分', '自动 80 / 20')
+        ].join('');
+        document.getElementById('category-grid').innerHTML = data.categories.map(item => `<div class="category-card">
+            <div class="category-title"><strong>${esc(item.category)}</strong><span class="ready">● 数据就绪</span></div>
+            <dl><div><dt>OK 图片</dt><dd>${item.counts.OK}</dd></div><div><dt>NG 图片</dt><dd>${item.counts.NG}</dd></div><div><dt>训练方式</dt><dd>独立模型</dd></div></dl>
+        </div>`).join('');
+        document.getElementById('category-checks').innerHTML = data.categories.map(item => `<label class="check"><input type="checkbox" name="category" value="${esc(item.category)}" checked>${esc(item.category)}</label>`).join('');
+        document.getElementById('train-result').innerHTML = '<div class="notice">系统会在每个任务开始时自动划分该类别的OK训练集和正常测试集；NG全部用于测试。</div>';
+    } catch (error) {
+        document.getElementById('overview').innerHTML = `<div class="notice error">${esc(error.message)}</div>`;
+        document.getElementById('category-grid').innerHTML = '<div class="empty">请先运行独立数据整理脚本</div>';
+    }
+}
+
+async function loadQueue() {
+    try {
+        const queue = await api('/api/queue');
+        const current = queue.current_task;
+        document.getElementById('queue-summary').innerHTML = `<div class="queue"><div><strong>${current ? `${esc(current.category)} · ${esc(current.name)}` : '当前没有运行任务'}</strong><span class="muted">${current ? esc(current.model_type) : 'GPU队列空闲'}</span></div><div class="count">${queue.queue_size}</div></div>`;
+    } catch (error) { document.getElementById('queue-summary').textContent = error.message; }
+}
+
+async function loadTasks() {
+    try {
+        const tasks = await api('/api/tasks');
+        if (!tasks.length) { document.getElementById('tasks-table').innerHTML = '<div class="empty">尚无训练任务</div>'; return; }
+        document.getElementById('tasks-table').innerHTML = `<table><thead><tr><th>板型类别</th><th>系统</th><th>模型</th><th>状态</th><th>创建时间</th><th>操作/信息</th></tr></thead><tbody>${tasks.slice(0,12).map(task => `<tr>
+            <td><strong>${esc(task.category || '旧任务')}</strong></td><td>${esc(task.name)}</td><td>${esc(task.model_type)}</td>
+            <td><span class="status ${esc(task.status)}">${esc(statusText[task.status] || task.status)}</span></td><td>${esc(task.created_at?.replace('T',' ').slice(0,19))}</td>
+            <td>${task.status === 'pending' ? `<button class="secondary" onclick="cancelTask('${encodeURIComponent(task.task_id)}')">取消</button>` : esc(task.error_message || '—')}</td></tr>`).join('')}</tbody></table>`;
+    } catch (error) { document.getElementById('tasks-table').textContent = error.message; }
+}
+
+function formatMetrics(metrics) {
+    if (!metrics) return '—';
+    return Object.entries(metrics).slice(0,3).map(([key,value]) => `${key}: ${typeof value === 'number' ? value.toFixed(4) : value}`).join(' · ');
+}
+
+async function loadModels() {
+    try {
+        const models = await api('/api/models');
+        if (!models.length) { document.getElementById('models-table').innerHTML = '<div class="empty">各类别模型训练完成后会显示在这里</div>'; return; }
+        document.getElementById('models-table').innerHTML = `<table><thead><tr><th>板型类别</th><th>系统</th><th>算法</th><th>指标</th><th>权重</th></tr></thead><tbody>${models.map(model => { const category=model.category; return `<tr>
+            <td><strong>${esc(category || '旧模型')}</strong></td><td>${esc(model.name)}</td><td>${esc(model.model_type)}</td><td>${esc(formatMetrics(model.metrics))}</td>
+            <td>${category ? `<a class="button" href="/api/models/${encodeURIComponent(model.name)}/${encodeURIComponent(category)}/${encodeURIComponent(model.model_type)}/download">下载</a>` : '旧格式'}</td></tr>`; }).join('')}</tbody></table>`;
+    } catch (error) { document.getElementById('models-table').textContent = error.message; }
+}
+
+async function cancelTask(taskId) {
+    try { await api(`/api/tasks/${taskId}/cancel`, {method:'POST'}); await refreshRuntime(); }
+    catch (error) { alert(error.message); }
+}
+
+document.getElementById('train-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const button = document.getElementById('train-button');
+    const categories = [...document.querySelectorAll('input[name="category"]:checked')].map(item => item.value);
+    const result = document.getElementById('train-result');
+    if (!categories.length) { result.innerHTML = '<div class="notice error">至少选择一个板型类别</div>'; return; }
+    button.disabled = true;
+    try {
+        const data = await api('/api/train', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+            name:document.getElementById('system-name').value,
+            model_type:document.getElementById('model-type').value,
+            categories,
+            force_retrain:document.getElementById('force-retrain').checked
+        })});
+        result.innerHTML = `<div class="notice">已为 ${Object.keys(data.task_ids).length} 个板型类别创建独立训练任务</div>`;
+        await refreshRuntime();
+    } catch (error) { result.innerHTML = `<div class="notice error">${esc(error.message)}</div>`; }
+    finally { button.disabled = false; }
+});
+
+async function refreshRuntime() { await Promise.all([loadQueue(),loadTasks(),loadModels()]); }
+loadDataset(); refreshRuntime(); setInterval(refreshRuntime,10000);
+</script>
+</body>
+</html>

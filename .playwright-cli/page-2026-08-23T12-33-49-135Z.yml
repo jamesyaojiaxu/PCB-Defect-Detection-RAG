@@ -1,0 +1,166 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: Multi-view anomaly system
+      - heading "PCB 五相机异常检测" [level=1] [ref=e6]
+      - generic [ref=e7]: C1–C5 独立训练 · 同板组一致划分 · 多模型统一管理
+    - generic [ref=e10]: 训练服务在线
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - heading "数据总览" [level=2] [ref=e14]
+        - generic [ref=e15]: D:\项目\pcb\PCB_Defect_Detection-main\data\pcb_by_camera
+      - generic [ref=e16]:
+        - generic [ref=e74]:
+          - generic [ref=e75]: 相机模型
+          - strong [ref=e76]: "5"
+        - generic [ref=e77]:
+          - generic [ref=e78]: 训练OK图片
+          - strong [ref=e79]: "1970"
+        - generic [ref=e80]:
+          - generic [ref=e81]: 测试OK图片
+          - strong [ref=e82]: "495"
+        - generic [ref=e83]:
+          - generic [ref=e84]: 测试NG图片
+          - strong [ref=e85]: "2545"
+      - generic [ref=e18]:
+        - generic [ref=e19]: 原始板组
+        - generic [ref=e20]: →
+        - generic [ref=e21]: C1模型
+        - generic [ref=e22]: C2模型
+        - generic [ref=e23]: C3模型
+        - generic [ref=e24]: C4模型
+        - generic [ref=e25]: C5模型
+        - generic [ref=e26]: →
+        - generic [ref=e27]: 板级融合
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - heading "启动训练" [level=2] [ref=e30]
+        - generic [ref=e31]: 串行GPU队列
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 系统名称
+            - textbox "系统名称" [ref=e36]: pcb_dataset
+          - generic [ref=e37]:
+            - generic [ref=e38]: 异常检测模型
+            - combobox "异常检测模型" [ref=e39]:
+              - option "PatchCore" [selected]
+              - option "EfficientAD"
+        - generic [ref=e40]:
+          - generic [ref=e41]: 参与训练的相机
+          - generic [ref=e42]:
+            - generic [ref=e86] [cursor=pointer]:
+              - checkbox "C1" [checked] [ref=e87]
+              - text: C1
+            - generic [ref=e88] [cursor=pointer]:
+              - checkbox "C2" [checked] [ref=e89]
+              - text: C2
+            - generic [ref=e90] [cursor=pointer]:
+              - checkbox "C3" [checked] [ref=e91]
+              - text: C3
+            - generic [ref=e92] [cursor=pointer]:
+              - checkbox "C4" [checked] [ref=e93]
+              - text: C4
+            - generic [ref=e94] [cursor=pointer]:
+              - checkbox "C5" [checked] [ref=e95]
+              - text: C5
+        - generic [ref=e44] [cursor=pointer]:
+          - checkbox "已有权重也重新训练" [ref=e45]
+          - text: 已有权重也重新训练
+        - button "创建五个独立模型任务" [ref=e46] [cursor=pointer]
+      - generic [ref=e97]: 板组划分：训练 394，正常测试 99，异常测试 509
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - heading "相机数据" [level=2] [ref=e49]
+        - generic [ref=e50]: 每张图片只进入对应相机模型
+      - generic [ref=e51]:
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - strong [ref=e100]: C1
+            - generic [ref=e101]: ● 数据就绪
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - term [ref=e104]: train / OK
+              - definition [ref=e105]: "394"
+            - generic [ref=e106]:
+              - term [ref=e107]: test / OK
+              - definition [ref=e108]: "99"
+            - generic [ref=e109]:
+              - term [ref=e110]: test / NG
+              - definition [ref=e111]: "509"
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - strong [ref=e114]: C2
+            - generic [ref=e115]: ● 数据就绪
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - term [ref=e118]: train / OK
+              - definition [ref=e119]: "394"
+            - generic [ref=e120]:
+              - term [ref=e121]: test / OK
+              - definition [ref=e122]: "99"
+            - generic [ref=e123]:
+              - term [ref=e124]: test / NG
+              - definition [ref=e125]: "509"
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - strong [ref=e128]: C3
+            - generic [ref=e129]: ● 数据就绪
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - term [ref=e132]: train / OK
+              - definition [ref=e133]: "394"
+            - generic [ref=e134]:
+              - term [ref=e135]: test / OK
+              - definition [ref=e136]: "99"
+            - generic [ref=e137]:
+              - term [ref=e138]: test / NG
+              - definition [ref=e139]: "509"
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - strong [ref=e142]: C4
+            - generic [ref=e143]: ● 数据就绪
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - term [ref=e146]: train / OK
+              - definition [ref=e147]: "394"
+            - generic [ref=e148]:
+              - term [ref=e149]: test / OK
+              - definition [ref=e150]: "99"
+            - generic [ref=e151]:
+              - term [ref=e152]: test / NG
+              - definition [ref=e153]: "509"
+        - generic [ref=e154]:
+          - generic [ref=e155]:
+            - strong [ref=e156]: C5
+            - generic [ref=e157]: ● 数据就绪
+          - generic [ref=e158]:
+            - generic [ref=e159]:
+              - term [ref=e160]: train / OK
+              - definition [ref=e161]: "394"
+            - generic [ref=e162]:
+              - term [ref=e163]: test / OK
+              - definition [ref=e164]: "99"
+            - generic [ref=e165]:
+              - term [ref=e166]: test / NG
+              - definition [ref=e167]: "509"
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - heading "训练队列" [level=2] [ref=e55]
+        - button "刷新" [ref=e56] [cursor=pointer]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - strong [ref=e60]: 当前没有运行任务
+          - text: GPU队列空闲
+        - generic [ref=e61]: "0"
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - heading "最近任务" [level=2] [ref=e64]
+        - generic [ref=e65]: C1–C5分别记录
+      - generic [ref=e67]: 尚无训练任务
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - heading "模型仓库" [level=2] [ref=e70]
+        - generic [ref=e71]: 独立权重
+      - generic [ref=e73]: 五个模型训练完成后会显示在这里

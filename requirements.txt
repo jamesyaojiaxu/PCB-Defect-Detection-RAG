@@ -1,0 +1,7 @@
+# 训练框架：core extra 包含 PyTorch/Lightning 等实际训练依赖，版本严格固定为 1.2.0
+anomalib[core]==1.2.0
+
+# Web、配置与数据检查
+Flask>=3.0,<4.0
+Pillow>=10.0
+PyYAML>=6.0

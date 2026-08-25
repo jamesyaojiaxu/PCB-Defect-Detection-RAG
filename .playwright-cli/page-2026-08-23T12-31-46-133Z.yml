@@ -1,0 +1,68 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: Multi-view anomaly system
+      - heading "PCB 五相机异常检测" [level=1] [ref=e6]
+      - generic [ref=e7]: C1–C5 独立训练 · 同板组一致划分 · 多模型统一管理
+    - generic [ref=e10]: 训练服务在线
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - heading "数据总览" [level=2] [ref=e14]
+        - generic [ref=e15]: 正在读取…
+      - generic [ref=e17]: 正在检查五相机数据
+      - generic [ref=e18]:
+        - generic [ref=e19]: 原始板组
+        - generic [ref=e20]: →
+        - generic [ref=e21]: C1模型
+        - generic [ref=e22]: C2模型
+        - generic [ref=e23]: C3模型
+        - generic [ref=e24]: C4模型
+        - generic [ref=e25]: C5模型
+        - generic [ref=e26]: →
+        - generic [ref=e27]: 板级融合
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - heading "启动训练" [level=2] [ref=e30]
+        - generic [ref=e31]: 串行GPU队列
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]:
+            - generic [ref=e35]: 系统名称
+            - textbox "系统名称" [ref=e36]: pcb_dataset
+          - generic [ref=e37]:
+            - generic [ref=e38]: 异常检测模型
+            - combobox "异常检测模型" [ref=e39]:
+              - option "PatchCore" [selected]
+              - option "EfficientAD"
+        - generic [ref=e40]:
+          - generic [ref=e41]: 参与训练的相机
+          - generic [ref=e43]: 加载中…
+        - generic [ref=e44] [cursor=pointer]:
+          - checkbox "已有权重也重新训练" [ref=e45]
+          - text: 已有权重也重新训练
+        - button "创建五个独立模型任务" [ref=e46] [cursor=pointer]
+    - generic [ref=e47]:
+      - generic [ref=e48]:
+        - heading "相机数据" [level=2] [ref=e49]
+        - generic [ref=e50]: 每张图片只进入对应相机模型
+      - generic [ref=e52]: 正在加载…
+    - generic [ref=e53]:
+      - generic [ref=e54]:
+        - heading "训练队列" [level=2] [ref=e55]
+        - button "刷新" [ref=e56] [cursor=pointer]
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - strong [ref=e60]: 当前没有运行任务
+          - text: GPU队列空闲
+        - generic [ref=e61]: "0"
+    - generic [ref=e62]:
+      - generic [ref=e63]:
+        - heading "最近任务" [level=2] [ref=e64]
+        - generic [ref=e65]: C1–C5分别记录
+      - generic [ref=e67]: 尚无训练任务
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - heading "模型仓库" [level=2] [ref=e70]
+        - generic [ref=e71]: 独立权重
+      - generic [ref=e73]: 五个模型训练完成后会显示在这里

@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.idea/
+.venv/
+
+# 外部数据与运行产物
+/pcb-dataset/
+/data/
+/output/
+/图片数据/
+/txt标注/
+/training_results/
+/logs/
+/trained_models/*.ckpt

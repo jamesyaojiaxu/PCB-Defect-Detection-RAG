@@ -1,0 +1,66 @@
+- main [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]: Multi-category anomaly system
+      - heading "PCB 多板型异常检测" [level=1] [ref=e6]
+      - generic [ref=e7]: 动态发现板型 · OK/NG自动划分 · 每类独立模型
+    - generic [ref=e10]: 训练服务在线
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - heading "数据总览" [level=2] [ref=e14]
+        - generic [ref=e15]: 正在读取…
+      - generic [ref=e17]: 正在检查板型类别数据
+      - generic [ref=e18]:
+        - generic [ref=e19]: 类别/OK/NG
+        - generic [ref=e20]: →
+        - generic [ref=e21]: 动态发现
+        - generic [ref=e22]: →
+        - generic [ref=e23]: 自动80/20划分
+        - generic [ref=e24]: →
+        - generic [ref=e25]: 每类独立模型
+    - generic [ref=e26]:
+      - generic [ref=e27]:
+        - heading "启动训练" [level=2] [ref=e28]
+        - generic [ref=e29]: 串行GPU队列
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]: 系统名称
+            - textbox "系统名称" [ref=e34]: pcb_dataset
+          - generic [ref=e35]:
+            - generic [ref=e36]: 异常检测模型
+            - combobox "异常检测模型" [ref=e37]:
+              - option "PatchCore" [selected]
+              - option "EfficientAD"
+        - generic [ref=e38]:
+          - generic [ref=e39]: 参与训练的板型类别
+          - generic [ref=e41]: 加载中…
+        - generic [ref=e42] [cursor=pointer]:
+          - checkbox "已有权重也重新训练" [ref=e43]
+          - text: 已有权重也重新训练
+        - button "为所选类别创建独立模型任务" [ref=e44] [cursor=pointer]
+    - generic [ref=e45]:
+      - generic [ref=e46]:
+        - heading "板型类别" [level=2] [ref=e47]
+        - generic [ref=e48]: 系统不预设类别名称
+      - generic [ref=e50]: 正在加载…
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - heading "训练队列" [level=2] [ref=e53]
+        - button "刷新" [ref=e54] [cursor=pointer]
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - strong [ref=e58]: 当前没有运行任务
+          - text: GPU队列空闲
+        - generic [ref=e59]: "0"
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - heading "最近任务" [level=2] [ref=e62]
+        - generic [ref=e63]: 各类别分别记录
+      - generic [ref=e65]: 尚无训练任务
+    - generic [ref=e66]:
+      - generic [ref=e67]:
+        - heading "模型仓库" [level=2] [ref=e68]
+        - generic [ref=e69]: 独立权重
+      - generic [ref=e71]: 五个模型训练完成后会显示在这里
