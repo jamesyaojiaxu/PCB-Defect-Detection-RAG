@@ -8,6 +8,7 @@ from flask import Flask, jsonify, render_template, request, send_file
 
 from dataset_layout import DatasetLayoutError, dataset_summary, discover_category_datasets
 from pcb_training_system import get_training_system
+from rag import RAGNotReadyError, get_rag_assistant
 
 
 BASE_DIR = Path(__file__).parent.resolve()
@@ -87,6 +88,33 @@ def create_app(data_root: str | Path | None = None) -> Flask:
     @app.get("/api/models")
     def models():
         return jsonify({"success": True, "data": get_training_system().list_all_models()})
+
+    @app.get("/api/chat/status")
+    def chat_status():
+        try:
+            return jsonify({"success": True, "data": get_rag_assistant(BASE_DIR).status()})
+        except (OSError, RuntimeError, ValueError) as error:
+            return jsonify({"success": False, "error": str(error)}), 503
+
+    @app.post("/api/chat")
+    def chat():
+        payload = request.get_json(silent=True) or {}
+        question = payload.get("message", "")
+        history = payload.get("history", [])
+        if not isinstance(question, str):
+            return jsonify({"success": False, "error": "message 必须是字符串"}), 400
+        if not isinstance(history, list):
+            return jsonify({"success": False, "error": "history 必须是数组"}), 400
+        try:
+            result = get_rag_assistant(BASE_DIR).ask(question, history)
+            return jsonify({"success": True, "data": result})
+        except RAGNotReadyError as error:
+            return jsonify({"success": False, "error": str(error)}), 503
+        except ValueError as error:
+            return jsonify({"success": False, "error": str(error)}), 400
+        except (OSError, RuntimeError) as error:
+            app.logger.exception("PCB知识助手调用失败")
+            return jsonify({"success": False, "error": str(error)}), 502
 
     @app.get("/api/models/<path:name>/<category>/<model_type>/download")
     def download_model(name: str, category: str, model_type: str):

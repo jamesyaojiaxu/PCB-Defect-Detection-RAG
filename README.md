@@ -66,8 +66,12 @@ PCB_Defect_Detection-main/
 ├── main.py                     # 系统入口
 ├── pcb_training_system.py      # 训练队列和Anomalib调用
 ├── web_interface.py            # Flask API
+├── build_rag_index.py          # 构建问答知识索引
+├── rag/                        # 文档解析、Chroma检索和问答服务
 ├── templates/index.html        # 管理页面
 ├── configs/training.yaml       # 划分和模型参数
+├── configs/rag.yaml            # RAG知识库与检索参数
+├── knowledge/                  # PDF/PPTX/DOCX/Markdown/TXT知识资料
 ├── tests/                      # 单元测试
 ├── environment.yml             # Conda环境
 ├── requirements.txt            # Python依赖
@@ -87,9 +91,14 @@ PCB_Defect_Detection-main/
 ├── dataset_layout.py
 ├── pcb_training_system.py
 ├── web_interface.py
+├── build_rag_index.py
+├── rag/
 ├── prepare_pcb_dataset.py      # 建议保留；仅运行系统时不会自动调用
 ├── configs/training.yaml
+├── configs/rag.yaml
 ├── templates/index.html
+├── knowledge/                  # 需要问答系统检索的资料
+├── .env.example                # 大模型接口配置示例，不含密钥
 ├── requirements.txt
 ├── environment.yml
 └── data/pcb_categories/        # 或换成自己的数据目录
@@ -102,6 +111,7 @@ PCB_Defect_Detection-main/
 - 原始 `pcb-dataset/`：数据已经整理好时不必上传；
 - `training_results/`、`logs/`：运行后自动创建；
 - `trained_models/`：训练后自动创建；迁移已有模型时才上传；
+- `data/rag_index/`：可在服务器重新构建；希望免去首次建库时也可以一起上传；
 - `output/`、截图、编辑器配置、缓存和旧TXT标注：不需要上传。
 
 如果准备在服务器上整理Kaggle原始数据，则还要上传原始 `pcb-dataset/`，再运行 `prepare_pcb_dataset.py`。该脚本与系统解耦，系统本身只读取整理后的OK/NG目录。
@@ -240,7 +250,75 @@ trained_models/
 - Web查看队列；
 - 独立模型下载。
 
-## 7. Ubuntu 22.04 + Conda + CUDA 12.4
+## 7. PCB知识助手与RAG
+
+网站右下角增加了一个 `AI` 小聊天入口。点击后展开聊天界面，问题经过以下流程：
+
+```text
+用户问题 → BGE中文向量 → Chroma相似度检索 → 带来源的证据
+                                           ↓
+                         OpenAI兼容模型生成回答（可选）
+```
+
+实现参考了 `jamesyaojiaxu/AOI-agent` 中提交 `1dfef42 add AOI inspection RAG assistant` 的设计：文档带页码解析、本地中文Embedding、Chroma持久化、结构化证据和强制引用。当前项目使用更轻量的Flask实现，以兼容Python 3.10.20和现有Anomalib环境。
+
+### 准备知识文档
+
+把可信资料放入：
+
+```text
+knowledge/
+├── AOI操作说明.pdf
+├── PCB缺陷判定标准.pptx
+├── 产线培训.docx
+└── 补充说明.md
+```
+
+支持：`.md`、`.txt`、`.pdf`、`.docx`、`.pptx`。根目录 `README.md` 默认也会被索引。
+
+构建知识索引：
+
+```bash
+python build_rag_index.py
+```
+
+首次运行会下载 `BAAI/bge-small-zh-v1.5`。Embedding固定在CPU上运行，不占用Anomalib训练GPU。资料发生变化后再次执行会自动重建；强制重建使用：
+
+```bash
+python build_rag_index.py --force
+```
+
+### 选择问答模式
+
+不配置大模型时，聊天框仍能工作，但只返回最相关的证据摘录和来源。
+
+需要生成式回答时：
+
+```bash
+cp .env.example .env
+nano .env
+```
+
+填写OpenAI兼容接口：
+
+```dotenv
+RAG_LLM_BASE_URL=https://api.openai.com/v1
+RAG_LLM_MODEL=你的模型名称
+RAG_LLM_API_KEY=你的密钥
+RAG_LLM_TIMEOUT=60
+```
+
+也支持本机Ollama、vLLM等兼容 `/v1/chat/completions` 的服务。例如Ollama：
+
+```dotenv
+RAG_LLM_BASE_URL=http://127.0.0.1:11434/v1
+RAG_LLM_MODEL=qwen2.5:7b
+RAG_LLM_API_KEY=
+```
+
+`.env` 已被Git忽略，不能把真实密钥上传到代码仓库。
+
+## 8. Ubuntu 22.04 + Conda + CUDA 12.4
 
 ### 安装系统依赖
 
@@ -305,11 +383,14 @@ PY
 
 正确结果应包含：Python `3.10.20`、Anomalib `1.2.0`、PyTorch `2.4.1+cu124`，并且 `CUDA available` 为 `True`。
 
-### 整理、测试、运行
+### 整理、建库、测试、运行
 
 ```bash
 # 仅当当前还是Kaggle原始数据时执行；已有类别/OK/NG时跳过
 python prepare_pcb_dataset.py --source /data/pcb-dataset --output data/pcb_categories
+
+# 把知识资料放入knowledge/后执行；至少会索引README.md
+python build_rag_index.py
 
 python -m unittest discover -s tests -v
 python main.py --data-root data/pcb_categories --validate-only
@@ -334,7 +415,7 @@ python main.py --data-root data/pcb_categories --model patchcore --host 0.0.0.0 
 sudo ufw allow 5000/tcp
 ```
 
-## 8. Web API
+## 9. Web API
 
 | 方法 | 地址 | 作用 |
 |---|---|---|
@@ -344,6 +425,8 @@ sudo ufw allow 5000/tcp
 | GET | `/api/queue` | 当前队列 |
 | GET | `/api/models` | 已训练模型 |
 | GET | `/api/models/<name>/<category>/<model>/download` | 下载类别模型 |
+| GET | `/api/chat/status` | 知识索引和问答模式状态 |
+| POST | `/api/chat` | 检索知识库并回答问题 |
 
 请求示例：
 
@@ -353,17 +436,28 @@ curl -X POST http://127.0.0.1:5000/api/train \
   -d '{"name":"pcb","model_type":"patchcore","categories":["phone_board","power_board"]}'
 ```
 
-## 9. 测试
+问答请求示例：
+
+```bash
+curl -X POST http://127.0.0.1:5000/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"系统如何划分OK和NG？","history":[]}'
+```
+
+## 10. 测试
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-测试覆盖：独立脚本分类整理、格式去重、无预设名称的类别发现、训练时自动划分、缓存复用、任务创建和取消。
+测试覆盖：独立脚本分类整理、格式去重、无预设名称的类别发现、训练时自动划分、缓存复用、任务创建和取消、RAG文档分块、证据回答和聊天API。
 
-## 10. 官方参考
+## 11. 官方参考
 
 - [Conda Linux安装](https://docs.conda.io/projects/conda/en/latest/user-guide/install/linux.html)
 - [PyTorch CUDA 12.4安装](https://docs.pytorch.org/get-started/previous-versions/)
 - [Anomalib](https://github.com/open-edge-platform/anomalib)
 - [NVIDIA CUDA兼容性](https://docs.nvidia.com/deploy/cuda-compatibility/minor-version-compatibility.html)
+- [AOI-agent 新增AOI检验RAG提交](https://github.com/jamesyaojiaxu/AOI-agent/commit/1dfef42e76af3b9ef45a01497e0ccb33c45f2635)
+- [Chroma](https://docs.trychroma.com/)
+- [Sentence Transformers](https://www.sbert.net/)

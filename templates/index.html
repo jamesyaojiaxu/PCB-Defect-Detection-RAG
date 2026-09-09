@@ -49,6 +49,29 @@
         button,.button { border:0; border-radius:9px; padding:10px 14px; color:#04202a; font-weight:800; cursor:pointer; background:linear-gradient(135deg,var(--cyan),var(--green)); text-decoration:none; display:inline-block; }
         button.secondary { color:#bad0e4; border:1px solid #294862; background:#0b1b2c; }
         button:disabled { opacity:.55; cursor:wait; }
+        .chat-launcher { position:fixed; right:26px; bottom:26px; z-index:50; width:58px; height:58px; padding:0; border-radius:18px; box-shadow:0 16px 35px rgba(0,0,0,.36),0 0 0 1px rgba(65,217,255,.22); display:grid; place-items:center; }
+        .chat-launcher-mark { display:grid; place-items:center; width:30px; height:25px; border:2px solid #06303a; border-radius:9px; font-size:11px; letter-spacing:.06em; }
+        .chat-launcher-mark:after { content:""; width:7px; height:7px; background:var(--green); border-radius:50%; box-shadow:0 0 8px #087652; }
+        .chat-panel { position:fixed; right:26px; bottom:96px; z-index:49; width:min(440px,calc(100vw - 32px)); height:min(650px,calc(100vh - 130px)); display:flex; flex-direction:column; overflow:hidden; border:1px solid #2c5876; border-radius:20px; background:rgba(8,21,36,.98); box-shadow:0 28px 75px rgba(0,0,0,.5); transform:translateY(18px) scale(.97); transform-origin:bottom right; opacity:0; visibility:hidden; pointer-events:none; transition:.18s ease; }
+        .chat-panel.open { transform:none; opacity:1; visibility:visible; pointer-events:auto; }
+        .chat-head { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 17px; border-bottom:1px solid #1d3b54; background:linear-gradient(135deg,#102d48,#0c2137); }
+        .chat-title { display:flex; align-items:center; gap:11px; }
+        .chat-avatar { width:38px; height:38px; border-radius:12px; display:grid; place-items:center; color:#05232d; background:linear-gradient(135deg,var(--cyan),var(--green)); font-weight:900; }
+        .chat-title strong,.chat-title small { display:block; } .chat-title small { color:var(--muted); margin-top:1px; }
+        .chat-close { width:34px; height:34px; padding:0; border:1px solid #31516b; color:#a9bfd5; background:#0a1b2d; font-size:20px; }
+        .chat-messages { flex:1; overflow:auto; padding:17px; display:flex; flex-direction:column; gap:13px; scroll-behavior:smooth; }
+        .chat-message { max-width:88%; padding:11px 13px; border-radius:14px; white-space:pre-wrap; overflow-wrap:anywhere; }
+        .chat-message.assistant { align-self:flex-start; border:1px solid #23445e; border-bottom-left-radius:4px; background:#10253a; color:#d8e7f5; }
+        .chat-message.user { align-self:flex-end; border-bottom-right-radius:4px; color:#06202a; background:linear-gradient(135deg,#55d9f5,#62e5ad); }
+        .chat-message.thinking { color:var(--muted); }
+        .chat-sources { display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+        .chat-source { padding:3px 7px; border:1px solid #31546e; border-radius:99px; color:#9fc9df; background:#0a1b2c; font-size:10px; }
+        .chat-suggestions { display:flex; gap:7px; overflow:auto; padding:0 17px 11px; }
+        .chat-suggestion { flex:0 0 auto; padding:7px 9px; color:#a9cadc; border:1px solid #294b65; background:#0b1d30; font-size:11px; font-weight:600; }
+        .chat-form { display:grid; grid-template-columns:1fr auto; gap:9px; padding:13px; border-top:1px solid #1e3a52; background:#091827; }
+        .chat-form textarea { resize:none; min-height:43px; max-height:110px; border:1px solid #2a4863; border-radius:11px; background:#071522; color:var(--text); padding:10px 11px; font:inherit; outline:none; }
+        .chat-form textarea:focus { border-color:var(--cyan); box-shadow:0 0 0 3px rgba(65,217,255,.1); }
+        .chat-send { align-self:end; min-width:68px; height:43px; }
         .notice { margin-top:10px; padding:9px 11px; border-radius:8px; background:#0a1929; color:var(--muted); }
         .notice.error { color:#ffc0c8; border:1px solid #6a3541; }
         .queue { display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:14px; border-radius:12px; background:#0a1929; border:1px solid #1e3952; }
@@ -65,7 +88,7 @@
         .empty { color:var(--muted); padding:20px 0; text-align:center; }
         code { color:#9eddf0; }
         @media(max-width:1000px) { .span-8,.span-4,.span-6 { grid-column:span 12; } .category-grid { grid-template-columns:repeat(2,1fr); } }
-        @media(max-width:650px) { .shell{padding:18px}.overview{grid-template-columns:1fr 1fr}.category-grid,.form-row{grid-template-columns:1fr}header{display:block}.live{display:inline-flex;margin-top:14px} }
+        @media(max-width:650px) { .shell{padding:18px}.overview{grid-template-columns:1fr 1fr}.category-grid,.form-row{grid-template-columns:1fr}header{display:block}.live{display:inline-flex;margin-top:14px}.chat-launcher{right:16px;bottom:16px}.chat-panel{inset:0;width:100%;height:100%;max-height:none;border-radius:0;transform:translateY(30px)} }
     </style>
 </head>
 <body>
@@ -117,6 +140,28 @@
         </section>
     </div>
 </main>
+
+<button class="chat-launcher" id="chat-launcher" type="button" aria-label="打开PCB知识助手" aria-expanded="false">
+    <span class="chat-launcher-mark">AI</span>
+</button>
+<aside class="chat-panel" id="chat-panel" role="dialog" aria-modal="true" aria-labelledby="chat-heading" aria-hidden="true">
+    <div class="chat-head">
+        <div class="chat-title"><div class="chat-avatar">AI</div><div><strong id="chat-heading">PCB 知识助手</strong><small id="chat-status">正在检查知识库…</small></div></div>
+        <button class="chat-close" id="chat-close" type="button" aria-label="关闭知识助手">×</button>
+    </div>
+    <div class="chat-messages" id="chat-messages" aria-live="polite">
+        <div class="chat-message assistant">你好，我会先检索项目知识库，再根据文档回答PCB数据、训练和AOI操作问题。回答会附带来源。</div>
+    </div>
+    <div class="chat-suggestions" id="chat-suggestions">
+        <button class="chat-suggestion" type="button">系统如何划分OK和NG？</button>
+        <button class="chat-suggestion" type="button">C1和C2如何训练？</button>
+        <button class="chat-suggestion" type="button">怎么启动Web系统？</button>
+    </div>
+    <form class="chat-form" id="chat-form">
+        <textarea id="chat-input" rows="1" maxlength="2000" placeholder="询问数据、训练、缺陷标准…" aria-label="输入问题" required></textarea>
+        <button class="chat-send" id="chat-send" type="submit">发送</button>
+    </form>
+</aside>
 
 <script>
 const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
@@ -215,6 +260,80 @@ document.getElementById('train-form').addEventListener('submit', async event => 
 });
 
 async function refreshRuntime() { await Promise.all([loadQueue(),loadTasks(),loadModels()]); }
+
+const chatPanel = document.getElementById('chat-panel');
+const chatLauncher = document.getElementById('chat-launcher');
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+const chatHistory = [];
+
+function setChatOpen(open) {
+    chatPanel.classList.toggle('open', open);
+    chatPanel.setAttribute('aria-hidden', String(!open));
+    chatLauncher.setAttribute('aria-expanded', String(open));
+    if (open) { checkChatStatus(); setTimeout(() => chatInput.focus(), 100); }
+}
+
+async function checkChatStatus() {
+    const label = document.getElementById('chat-status');
+    try {
+        const status = await api('/api/chat/status');
+        label.textContent = status.ready ? (status.mode === 'llm' ? `知识库就绪 · ${status.model}` : '知识库就绪 · 证据模式') : '知识库未建立';
+    } catch (error) { label.textContent = error.message; }
+}
+
+function appendChatMessage(role, content, sources=[]) {
+    const message = document.createElement('div');
+    message.className = `chat-message ${role}`;
+    const text = document.createElement('div');
+    text.textContent = content;
+    message.appendChild(text);
+    if (sources.length) {
+        const sourceList = document.createElement('div');
+        sourceList.className = 'chat-sources';
+        const unique = [...new Map(sources.map(item => [item.citation, item])).values()];
+        unique.forEach(item => {
+            const source = document.createElement('span');
+            source.className = 'chat-source';
+            source.textContent = item.citation;
+            sourceList.appendChild(source);
+        });
+        message.appendChild(sourceList);
+    }
+    chatMessages.appendChild(message);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    return message;
+}
+
+async function sendChatMessage(value) {
+    const question = value.trim();
+    if (!question) return;
+    const button = document.getElementById('chat-send');
+    appendChatMessage('user', question);
+    const previousHistory = chatHistory.slice(-6);
+    chatHistory.push({role:'user',content:question});
+    chatInput.value = '';
+    button.disabled = true;
+    const thinking = appendChatMessage('assistant thinking', '正在检索知识库…');
+    try {
+        const result = await api('/api/chat', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:question,history:previousHistory})});
+        thinking.remove();
+        appendChatMessage('assistant', result.answer, result.sources || []);
+        chatHistory.push({role:'assistant',content:result.answer});
+        if (result.warning) document.getElementById('chat-status').textContent = '生成模型不可用 · 已返回证据';
+    } catch (error) {
+        thinking.remove();
+        appendChatMessage('assistant', `暂时无法回答：${error.message}`);
+    } finally { button.disabled = false; chatInput.focus(); }
+}
+
+chatLauncher.addEventListener('click', () => setChatOpen(!chatPanel.classList.contains('open')));
+document.getElementById('chat-close').addEventListener('click', () => setChatOpen(false));
+document.getElementById('chat-form').addEventListener('submit', event => { event.preventDefault(); sendChatMessage(chatInput.value); });
+chatInput.addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendChatMessage(chatInput.value); } });
+document.getElementById('chat-suggestions').addEventListener('click', event => { if (event.target.matches('button')) sendChatMessage(event.target.textContent); });
+document.addEventListener('keydown', event => { if (event.key === 'Escape') setChatOpen(false); });
+
 loadDataset(); refreshRuntime(); setInterval(refreshRuntime,10000);
 </script>
 </body>

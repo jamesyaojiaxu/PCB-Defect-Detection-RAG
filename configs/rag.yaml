@@ -1,0 +1,15 @@
+knowledge_dir: knowledge
+include_files:
+  - README.md
+
+persist_dir: data/rag_index
+collection_name: pcb_knowledge
+
+# 与 AOI-agent 新RAG提交保持一致：中文本地Embedding固定使用CPU，避免占用训练GPU。
+embedding_model: BAAI/bge-small-zh-v1.5
+embedding_device: cpu
+
+chunk_size: 900
+chunk_overlap: 150
+top_k: 4
+max_history_messages: 6
